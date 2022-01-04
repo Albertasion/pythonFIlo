@@ -7,7 +7,9 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from create_profile import register_handlers_profile_reg
-
+import sqlite3
+sqlconnection = sqlite3.connect("data.db")
+cur = sqlconnection.cursor()
 
 #запуск функции загрузки данніх нового пользователя
 register_handlers_profile_reg(dp)
