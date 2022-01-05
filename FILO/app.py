@@ -7,18 +7,15 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from create_profile import register_handlers_profile_reg
-import sqlite3
-sqlconnection = sqlite3.connect("data.db")
-cur = sqlconnection.cursor()
 
 async def set_default_commands(dp):
     await dp.bot.set_my_commands(
         [
-            types.BotCommand("red", "Редактировать анкету"),
-            types.BotCommand("help", "Просмотреть анкету"),
-            types.BotCommand("search", "Начать поиск"),
-            types.BotCommand("meet", "Мои знакомства"),
-            types.BotCommand("find", "Фильтр поиска"),
+            types.BotCommand("edit", "✏    Редактировать анкету"),
+            types.BotCommand("help", "👀    Просмотреть анкету"),
+            types.BotCommand("search", "🔎    Начать поиск"),
+            types.BotCommand("meet", "👍    Мои симпатии"),
+            types.BotCommand("find", "☑️    Фильтр поиска"),
             types.BotCommand("balance", "Мой баланс"),
             types.BotCommand("present", "Мои подарки"),
             types.BotCommand("order", "Правила"),
