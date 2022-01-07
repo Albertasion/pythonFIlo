@@ -10,7 +10,7 @@ async def echo(message: types.Message):
 
 # колбек выбран русский язык
 @dp.callback_query_handler(text="ru_language_value")
-async def ru_choice_lang(call:types.CallbackQuery):
+async def ru_choice_lang(call: types.CallbackQuery):
     await call.message.answer("Вы выбрали русский язык")
     await call.answer("Начнем заполнение данных")
 

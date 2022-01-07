@@ -1,11 +1,7 @@
 #!/usr/bin/python
 from aiogram import executor
-from loader import dp
 from start import *
-from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import types, Dispatcher
-from aiogram.dispatcher import FSMContext
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from create_profile import register_handlers_profile_reg
 
 async def set_default_commands(dp):
@@ -26,6 +22,7 @@ async def set_default_commands(dp):
 async def on_startup(dispatcher):
     # Устанавливаем дефолтные команды
     await set_default_commands(dispatcher)
+    await dp.bot.send_message(679511059, "Bot startoval")
 
 
 #запуск функции загрузки данніх нового пользователя
