@@ -28,5 +28,6 @@ async def on_startup(dispatcher):
 
 #запуск функции загрузки данніх нового пользователя
 register_handlers_profile_reg(dp)
+
 # Запуск бота.Start bot.
 executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

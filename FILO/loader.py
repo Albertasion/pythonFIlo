@@ -14,20 +14,6 @@ from aiogram.utils.callback_data import CallbackData
 logging.basicConfig(level=logging.INFO)
 dp.middleware.setup(LoggingMiddleware())
 
-# vote_cb = CallbackData('vote', 'action')
-# def get_keyboard():
-#     return types.InlineKeyboardMarkup().add(types.InlineKeyboardButton('Нравится', callback_data=vote_cb.new(action='up')))
-#
-# @dp.message_handler(commands='search')
-# async def cmd_start(message: types.Message):
-#     await message.answer_photo('AgACAgIAAxkBAAIIb2Hcp5Jy5ZrMijk-Ro5TooLYZPqZAALOtjEb6AzoShpWWW7_OSVlAQADAgADeQADIwQ', caption='Zapis', reply_markup=get_keyboard())
-#
-# @dp.callback_query_handler(vote_cb.filter(action='up'))
-# async def vote_up_cb_handler(call: types.CallbackQuery, callback_data: dict):
-#     await call.message.answer('Like')
-#     await call.message.answer_sticker('CAACAgIAAxkBAAEDrK9h30SHP1bXS-Mp-S3F3SsiJh3i4wACUxMAAglroUll6QRkOIE6BCME')
-#     await call.answer("Вы проголосовали за ❤️")
-
 
 
 
