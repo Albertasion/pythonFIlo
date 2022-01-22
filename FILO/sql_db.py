@@ -1,4 +1,5 @@
 import sqlite3
+global sqlconnection, cur
 # Подключение к базе
 def sql_start():
     global sqlconnection, cur

@@ -1,29 +1,27 @@
 import asyncio
-
 from aiogram.dispatcher import FSMContext
-from aiogram.dispatcher.filters.state import State, StatesGroup
+
 from aiogram import Dispatcher, types
 from aiogram.types import CallbackQuery
-from aiogram.utils import callback_data
 
+# from FILO.handlers.users.search import vote_up_cb_handler, vote_down_cb_handler, vote_spam_cb_handler
+from states.create_profile import FSMProfile
 from keyboards.inline.profile_kb import vote_cb, keyboard_profile, metabolism_gender_markup, gender_callback
 from sql_db import sql_add_profile, sql_read
-from loader import dp, bot
+from loader import dp
 import random
-from aiogram.utils.callback_data import CallbackData
-from contextlib import suppress
-from aiogram.utils.exceptions import (MessageToEditNotFound, MessageCantBeEdited, MessageCantBeDeleted, MessageToDeleteNotFound)
 
-@dp.message_handler(commands=['profile'])
-async def echo(message: types.Message):
-    read = await sql_read()
-    random_profile = random.choice(read)
-    photo_item = random_profile[0]
-    name_item = random_profile[1]
-    age_item = random_profile[2]
-    gender_item = random_profile[3]
-    hobby_item = random_profile[4]
-    await message.answer_photo(photo_item, caption=f'{name_item} {age_item} {gender_item} {hobby_item}', protect_content=True)
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -68,8 +66,6 @@ async def vote_down_cb_handler(call: types.CallbackQuery, callback_data: dict):
 
 
 
-
-
 async def vote_spam_cb_handler(call: types.CallbackQuery, callback_data: dict):
     await call.answer("Сообщение о спаме отавлено админу")
     await dp.bot.send_message(679511059, "Жалоба на профиль")
@@ -85,29 +81,26 @@ async def vote_spam_cb_handler(call: types.CallbackQuery, callback_data: dict):
 
 
 
-# @dp.callback_query_handler(gender_callback.filter(), state=FSMProfile.gender)
 
 
 
 
 
+@dp.message_handler(commands=['profile'])
+async def echo(message: types.Message):
+    read = await sql_read()
+    random_profile = random.choice(read)
+    photo_item = random_profile[0]
+    name_item = random_profile[1]
+    age_item = random_profile[2]
+    gender_item = random_profile[3]
+    hobby_item = random_profile[4]
+    await message.answer_photo(photo_item, caption=f'{name_item} {age_item} {gender_item} {hobby_item}', protect_content=True)
 
 
 
-class FSMProfile(StatesGroup):
-    photo = State()
-    name = State()
-    age = State()
-    gender = State()
-    hobby = State()
-    chat_id = State()
-
-#запрос у пользвателя на загрузку фото при команде Load
-# @dp.message_handler(commands="Load", state=None)
 
 
-
-#     await FSMProfile.next()
 
 
 async def msg_load_photo(message: types.Message):

@@ -1,6 +1,5 @@
 #!/usr/bin/python
 from aiogram import executor
-
 from handlers.users.start import register_handlers_start
 from utils.set_bot_commands import set_default_commands
 from create_profile import register_handlers_profile_reg
@@ -17,5 +16,7 @@ async def on_startup(dispatcher):
 #запуск функции загрузки данніх нового пользователя
 register_handlers_profile_reg(dp)
 register_handlers_start(dp)
+# register_handlers_search(dp)
+
 # Запуск бота.Start bot.
 executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
