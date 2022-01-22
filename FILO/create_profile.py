@@ -3,8 +3,12 @@ import asyncio
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram import Dispatcher, types
+from aiogram.types import CallbackQuery
+from aiogram.utils import callback_data
+
+from keyboards.inline.profile_kb import vote_cb, keyboard_profile, metabolism_gender_markup, gender_callback
 from sql_db import sql_add_profile, sql_read
-from loader import dp
+from loader import dp, bot
 import random
 from aiogram.utils.callback_data import CallbackData
 from contextlib import suppress
@@ -17,27 +21,7 @@ async def echo(message: types.Message):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}')
-
-vote_cb = CallbackData('vote', 'action')
-def get_keyboard():
-    return types.InlineKeyboardMarkup().add(
-        types.InlineKeyboardButton('👍 ', callback_data=vote_cb.new(action='ups')),
-        types.InlineKeyboardButton('👎 ', callback_data=vote_cb.new(action='down')),
-        types.InlineKeyboardButton('ℹ️ Подробнее', callback_data=vote_cb.new(action='detail_profile')),
-        types.InlineKeyboardButton('📧 Написать', callback_data=vote_cb.new(action='write_letter')),
-        types.InlineKeyboardButton('🗑️ Жалоба', callback_data=vote_cb.new(action='spam_profile'))
-    )
-
-
-# async def get_profile():
-#     read = await sql_read()
-#     random_profile = random.choice(read)
-#     photo_item = random_profile[0]
-#     name_item = random_profile[1]
-#     age_item = random_profile[2]
-#     return photo_item, name_item, age_item
-
+    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}', protect_content=True)
 
 
 
@@ -49,7 +33,7 @@ async def cmd_start(message: types.Message):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}', reply_markup=get_keyboard())
+    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
 
 # @dp.callback_query_handler(vote_cb.filter(action='ups'))
 async def vote_up_cb_handler(call: types.CallbackQuery, callback_data: dict):
@@ -58,7 +42,7 @@ async def vote_up_cb_handler(call: types.CallbackQuery, callback_data: dict):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', reply_markup=get_keyboard())
+    await call.message.answer_photo(photo_item, caption=f'<b>{name_item}</b> <i>{age_item}</i>', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
     await call.answer("Вы проголосовали за ❤️")
     await call.answer()
     await asyncio.sleep(1)
@@ -70,7 +54,7 @@ async def vote_down_cb_handler(call: types.CallbackQuery, callback_data: dict):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', reply_markup=get_keyboard())
+    await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
     await call.answer("Вы проголосовали против")
     await call.answer()
     await asyncio.sleep(0.5)
@@ -83,10 +67,19 @@ async def vote_down_cb_handler(call: types.CallbackQuery, callback_data: dict):
 async def vote_spam_cb_handler(call: types.CallbackQuery, callback_data: dict):
     await call.answer("Сообщение о спаме отавлено админу")
     await dp.bot.send_message(679511059, "Жалоба на профиль")
+    read = await sql_read()
+    random_profile = random.choice(read)
+    photo_item = random_profile[0]
+    name_item = random_profile[1]
+    age_item = random_profile[2]
+    await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
+    await call.answer()
+    await asyncio.sleep(0.5)
+    await call.message.delete()
 
 
 
-
+# @dp.callback_query_handler(gender_callback.filter(), state=FSMProfile.gender)
 
 
 
@@ -133,14 +126,24 @@ async def load_name(message: types.Message, state:FSMContext):
 async def load_age(message: types.Message, state:FSMContext):
     async with state.proxy() as data:
         data["age"] = message.text
-        await message.answer("Выберите ваш пол")
+        await message.answer("Выберите ваш пол", reply_markup=metabolism_gender_markup)
         await FSMProfile.next()
 #захват пола польователя и запрос хобби
-async def load_gender(message: types.Message, state:FSMContext):
-    async with state.proxy() as data:
-        data["gender"] = message.text
-        await FSMProfile.next()
-        await message.answer("Введите ваши хобби")
+@dp.callback_query_handler(gender_callback.filter(),  state=FSMProfile.gender)
+async def load_gender(call: CallbackQuery,callback_data: dict, state: FSMContext):
+    gender = callback_data["description"]
+    await call.message.answer(gender)
+    # await FSMProfile.gender.set()
+    # await call.message.edit_reply_markup(reply_markup=None)
+    # async with state.proxy() as data:
+    #     gender=data.values()
+
+    # await state.update_data(gender=gender)
+    # description = callback_data.get("description")
+    # await call.message.answer(f"{description}")
+    await FSMProfile.next()
+    await call.message.answer("Введите ваши хобби")
+
 
 # захват ответа хобби и обработка хобби пользователя
 async def load_hobby(message: types.Message, state: FSMContext):
@@ -159,7 +162,8 @@ def register_handlers_profile_reg(dp : Dispatcher):
     dp.register_message_handler(load_profile_photo, content_types="photo", state=FSMProfile.photo)
     dp.register_message_handler(load_name, state=FSMProfile.name)
     dp.register_message_handler(load_age, state=FSMProfile.age)
-    dp.register_message_handler(load_gender, state=FSMProfile.gender)
+    # dp.register_callback_query_handler(load_gender, state=FSMProfile.gender)
+    # dp.register_message_handler(load_gender, state=FSMProfile.gender)
     dp.register_message_handler(load_hobby, state=FSMProfile.hobby)
     dp.register_callback_query_handler(vote_up_cb_handler, vote_cb.filter(action='ups'))
     dp.register_callback_query_handler(vote_down_cb_handler, vote_cb.filter(action='down'))
