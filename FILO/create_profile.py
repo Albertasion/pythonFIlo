@@ -21,7 +21,9 @@ async def echo(message: types.Message):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}', protect_content=True)
+    gender_item = random_profile[3]
+    hobby_item = random_profile[4]
+    await message.answer_photo(photo_item, caption=f'{name_item} {age_item} {gender_item} {hobby_item}', protect_content=True)
 
 
 
@@ -33,7 +35,9 @@ async def cmd_start(message: types.Message):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
+    gender_item = random_profile[3]
+    hobby_item = random_profile[4]
+    await message.answer_photo(photo_item, caption=f'{name_item} {age_item} {gender_item} {hobby_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
 
 # @dp.callback_query_handler(vote_cb.filter(action='ups'))
 async def vote_up_cb_handler(call: types.CallbackQuery, callback_data: dict):
@@ -42,10 +46,12 @@ async def vote_up_cb_handler(call: types.CallbackQuery, callback_data: dict):
     photo_item = random_profile[0]
     name_item = random_profile[1]
     age_item = random_profile[2]
-    await call.message.answer_photo(photo_item, caption=f'<b>{name_item}</b> <i>{age_item}</i>', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
+    gender_item = random_profile[3]
+    hobby_item = random_profile[4]
+    await call.message.answer_photo(photo_item, caption=f'<b>{name_item}</b> <i>{age_item}</i> {gender_item} {hobby_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
     await call.answer("Вы проголосовали за ❤️")
     await call.answer()
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.1)
     await call.message.delete()
 
 async def vote_down_cb_handler(call: types.CallbackQuery, callback_data: dict):
@@ -57,7 +63,7 @@ async def vote_down_cb_handler(call: types.CallbackQuery, callback_data: dict):
     await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
     await call.answer("Вы проголосовали против")
     await call.answer()
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(0.1)
     await call.message.delete()
 
 
@@ -74,7 +80,7 @@ async def vote_spam_cb_handler(call: types.CallbackQuery, callback_data: dict):
     age_item = random_profile[2]
     await call.message.answer_photo(photo_item, caption=f'{name_item} {age_item}', disable_notification=True, protect_content=True, reply_markup=keyboard_profile())
     await call.answer()
-    await asyncio.sleep(0.5)
+    await asyncio.sleep(0.1)
     await call.message.delete()
 
 
@@ -130,19 +136,13 @@ async def load_age(message: types.Message, state:FSMContext):
         await FSMProfile.next()
 #захват пола польователя и запрос хобби
 @dp.callback_query_handler(gender_callback.filter(),  state=FSMProfile.gender)
-async def load_gender(call: CallbackQuery,callback_data: dict, state: FSMContext):
-    gender = callback_data["description"]
-    await call.message.answer(gender)
-    # await FSMProfile.gender.set()
-    # await call.message.edit_reply_markup(reply_markup=None)
-    # async with state.proxy() as data:
-    #     gender=data.values()
-
-    # await state.update_data(gender=gender)
-    # description = callback_data.get("description")
-    # await call.message.answer(f"{description}")
-    await FSMProfile.next()
-    await call.message.answer("Введите ваши хобби")
+async def load_gender(call: CallbackQuery, callback_data: dict, state: FSMContext, gender_item=None):
+    async with state.proxy() as data:
+        print(callback_data.get('description'))
+        data['gender'] = callback_data.get('description')
+        print(data['gender'])
+        await FSMProfile.next()
+        await call.message.answer("Введите ваши хобби")
 
 
 # захват ответа хобби и обработка хобби пользователя
@@ -162,8 +162,7 @@ def register_handlers_profile_reg(dp : Dispatcher):
     dp.register_message_handler(load_profile_photo, content_types="photo", state=FSMProfile.photo)
     dp.register_message_handler(load_name, state=FSMProfile.name)
     dp.register_message_handler(load_age, state=FSMProfile.age)
-    # dp.register_callback_query_handler(load_gender, state=FSMProfile.gender)
-    # dp.register_message_handler(load_gender, state=FSMProfile.gender)
+    dp.register_callback_query_handler(load_gender, state=FSMProfile.gender)
     dp.register_message_handler(load_hobby, state=FSMProfile.hobby)
     dp.register_callback_query_handler(vote_up_cb_handler, vote_cb.filter(action='ups'))
     dp.register_callback_query_handler(vote_down_cb_handler, vote_cb.filter(action='down'))
